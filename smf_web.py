@@ -1,9 +1,28 @@
-from flask import Flask, make_response, render_template
+from flask import Flask, make_response, render_template, request
 import datetime
 from functions import *
 import pathlib
 
 app = Flask(__name__)
+
+class Hero:
+
+    def __init__(self, name):
+        self.name = name
+        self.notes = []
+        self.move = 0
+        self.body_points = 0
+        self.psych_points = 0
+        self.power_level = None
+
+    def set_power_level(self, power_level):
+        self.power_level = power_level
+
+    def print_hero(self):
+        print('\n\n------------ ', self.name, ' --------------')
+        for attr, value in self.__dict__.items():
+            print(attr, '=' ,value)
+        print('\n\n')
 
 basedir = pathlib.Path(__file__).parent.resolve()
 
@@ -23,13 +42,27 @@ def start_page():
     temp_timestamp = str(datetime.datetime.now())
     timestamp = simplify_timestamp(temp_timestamp)
 
+    # list of power levels to choose from
+    power_level_list = ['Street-Level', 'Hero', 'Super', 'Powerhouse']
 
-    resp = make_response(render_template('home.html', timestamp=timestamp))
+    # create response and set cookie
+    resp = make_response(render_template('home.html', timestamp=timestamp, power_level_list=power_level_list))
     resp.set_cookie('session_id', timestamp)
 
-    #return render_template('login_form.html', alert_box_class=alert_box_class, results=results)
-    # return render_template('login_form.html', alert_box_class=alert_box_class, results=results, resp=resp)
     return resp
+
+@app.route('/power_level_results', methods=['POST'])
+def power_level_results():
+
+    # get info from form
+    name = request.form['heroname']
+    power_level = request.form['power_level']
+
+    # instantiate hero
+    hero = Hero(name)
+    hero.set_power_level(power_level)
+    hero.print_hero()
+    return 'hello'
 
 if __name__ == '__main__':
     # app.run()

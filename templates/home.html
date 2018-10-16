@@ -1,4 +1,43 @@
 {% extends 'base.html' %}
     {% block body %}
-        <p> homepage here {{ timestamp }}</p>
+    <p> homepage here {{ timestamp }}</p>
+
+
+    <p> Time to choose a name for your hero, choose well.  </p>
+    <form method='POST' action='/power_level_results'>
+      <section class="form-header">
+      <h3>Setup</h3>
+      </section>
+      <section class="form-body">
+      <p>Choose your name:</p>
+      <input type="text" name="heroname">
+      <p>Tagline to add to sheet (optional)</p>
+      <input type="text" name="tagline" placeholder="e.g. The Fastest Mutant Alive">
+      <input type="hidden" name="timestamp" value="{{ timestamp }}">
+      <p>Choose a power level for you hero.<p>
+      {% for power_level in power_level_list %}
+        <div class="picker {{ loop.cycle('odd', 'even') }}">
+          <label class="container"><span class="{{ power_level }}">{{ power_level }}
+            <input type="radio" name="power_level" class="{{ power_level }}" value="{{ power_level }}">
+            <span class="checkmark"></span>
+          </label>
+        </div>
+        {% endfor %}
+
+      <p class="submitp"><input class="button" value='Make Choice' type='SUBMIT'></p>
+      </section>
+    </form>
+    {% endblock %}
+
+    {% block script %}
+    <script type=text/javascript>
+          $(document).ready(function(){
+
+            $(".Hero").prop( "checked", true );
+
+           });
+
+
+    </script>
+
     {% endblock %}
