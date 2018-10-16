@@ -1,7 +1,10 @@
-from flask import Flask, make_response, render_template, request
+from flask import Flask, make_response, render_template, request, redirect, url_for
 import datetime
 from functions import *
 import pathlib
+from functools import wraps
+import json
+import jsonpickle
 
 app = Flask(__name__)
 
@@ -24,6 +27,22 @@ class Hero:
             print(attr, '=' ,value)
         print('\n\n')
 
+    # @classmethod
+    # def init_from_json_str(cls, json_str):
+    #     m = cls(None)
+    #     m.__dict__ = json.loads(json_str)
+    #     return m
+
+    def temp_dump(self, session_id):
+        """takes hero dict and turns it into a json file in the temp directory"""
+        with open(pathlib.Path(basedir).joinpath('static', 'temp', session_id, 'hero_storage.json'), 'w') as f:
+            json.dump(self.__dict__, f, indent=2)
+
+    def temp_pickle(self, session_id):
+        with open(pathlib.Path(basedir).joinpath('static', 'temp', session_id, 'hero_pickle_storage.json'), 'w') as f:
+            jsonpickle.encode(self)
+
+global basedir
 basedir = pathlib.Path(__file__).parent.resolve()
 
 def cookie_required(f):
@@ -52,7 +71,11 @@ def start_page():
     return resp
 
 @app.route('/power_level_results', methods=['POST'])
+@cookie_required
 def power_level_results():
+
+    #get cookie info
+    session_id = request.cookies.get('session_id')
 
     # get info from form
     name = request.form['heroname']
@@ -62,7 +85,31 @@ def power_level_results():
     hero = Hero(name)
     hero.set_power_level(power_level)
     hero.print_hero()
-    return 'hello'
+
+    # create folder to store hero stats in
+    pathlib.Path(basedir).joinpath('static', 'temp', session_id).mkdir(exist_ok=True)
+
+    hero.temp_dump(session_id)
+    hero.temp_pickle(session_id)
+
+    if hero.power_level == 'Street-Level':
+        return 'Street-Level'
+    elif hero.power_level == 'Hero':
+        return redirect(url_for('archetype_picker'))
+    return session_id
+
+
+@app.route('/archetype_picker')
+@cookie_required
+def archetype_picker():
+
+    #get cookie info
+    session_id = request.cookies.get('session_id')
+
+    # temp_hero = grab_from_temp(session_id, 'hero_storage')
+    # Spot = Hero.init_from_json_str(temp_hero)
+    # print(Spot.name)
+    return 'archetype_picker'
 
 if __name__ == '__main__':
     # app.run()
