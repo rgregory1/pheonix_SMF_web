@@ -98,11 +98,10 @@ def archetype_picker():
     #get cookie info
     session_id = request.cookies.get('session_id')
 
-    # temp_hero = grab_from_temp(session_id, 'hero_storage')
-    # Spot = Hero.init_from_json_str(temp_hero)
-    # print(Spot.name)
-
+    # setup hero object from storage
     hero = load_hero_object(session_id)
+
+    # test if hero retreval is working
     return_thingy = 'archetype_picker '+ session_id + ' ' + hero.name
     return return_thingy
 
