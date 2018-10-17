@@ -27,20 +27,12 @@ class Hero:
             print(attr, '=' ,value)
         print('\n\n')
 
-    # @classmethod
-    # def init_from_json_str(cls, json_str):
-    #     m = cls(None)
-    #     m.__dict__ = json.loads(json_str)
-    #     return m
-
     def temp_dump(self, session_id):
         """takes hero dict and turns it into a json file in the temp directory"""
-        with open(pathlib.Path(basedir).joinpath('static', 'temp', session_id, 'hero_storage.json'), 'w') as f:
-            json.dump(self.__dict__, f, indent=2)
-
-    def temp_pickle(self, session_id):
-        with open(pathlib.Path(basedir).joinpath('static', 'temp', session_id, 'hero_pickle_storage.json'), 'w') as f:
-            jsonpickle.encode(self)
+        f = open(pathlib.Path(basedir).joinpath('static', 'temp', session_id, 'hero_pickle_storage.json'), 'w')
+        stored_info = jsonpickle.encode(self)
+        f.write(stored_info)
+        f.close()
 
 global basedir
 basedir = pathlib.Path(__file__).parent.resolve()
@@ -90,7 +82,7 @@ def power_level_results():
     pathlib.Path(basedir).joinpath('static', 'temp', session_id).mkdir(exist_ok=True)
 
     hero.temp_dump(session_id)
-    hero.temp_pickle(session_id)
+
 
     if hero.power_level == 'Street-Level':
         return 'Street-Level'
@@ -109,7 +101,10 @@ def archetype_picker():
     # temp_hero = grab_from_temp(session_id, 'hero_storage')
     # Spot = Hero.init_from_json_str(temp_hero)
     # print(Spot.name)
-    return 'archetype_picker'
+
+    hero = load_hero_object(session_id)
+    return_thingy = 'archetype_picker '+ session_id + ' ' + hero.name
+    return return_thingy
 
 if __name__ == '__main__':
     # app.run()
